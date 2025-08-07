@@ -53,7 +53,7 @@ export default function DocumentViewPage() {
           '연락처': '010-1234-5678',
           '입사일': '2024-02-01',
           '서명': '완료'
-        }
+        } as Record<string, string>
       },
       {
         id: 2,
@@ -67,7 +67,7 @@ export default function DocumentViewPage() {
           '연락처': '010-9876-5432',
           '입사일': '2024-02-01',
           '서명': '완료'
-        }
+        } as Record<string, string>
       }
     ]
   }
