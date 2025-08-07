@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '../../../components/AuthProvider'
 import Link from 'next/link'
 import { 
-  FileText, Upload, Type, Signature, CheckSquare, Calendar,
+  FileText, Upload, Type, PenTool, CheckSquare, Calendar,
   Radio, Hash, Mail, Phone, Link2, Image, Save, Share2,
   ArrowLeft, Settings, Trash2, Move, Copy, Eye
 } from 'lucide-react'
@@ -26,7 +26,7 @@ export default function NewDocumentPage() {
   // 필드 타입 정의
   const fieldTypes = [
     { id: 'text', label: '텍스트', icon: Type, color: 'blue' },
-    { id: 'signature', label: '서명', icon: Signature, color: 'purple' },
+    { id: 'signature', label: '서명', icon: PenTool, color: 'purple' },
     { id: 'checkbox', label: '체크박스', icon: CheckSquare, color: 'green' },
     { id: 'date', label: '날짜', icon: Calendar, color: 'orange' },
     { id: 'radio', label: '라디오', icon: Radio, color: 'pink' },
