@@ -215,7 +215,7 @@ export default function TemplatesPage() {
                     </div>
                     
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">{template.title}</h3>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{template.description}</p>
+                    <p className="text-sm text-gray-600 mb-4">{template.description}</p>
                     
                     <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
                       <span className="flex items-center space-x-1">
