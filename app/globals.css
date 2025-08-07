@@ -1,6 +1,7 @@
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 
 /* 기본 스타일 */
 * {
@@ -11,71 +12,296 @@ html,
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 색상 변수 */
+:root {
+  --color-primary: #1E88E5;
+  --color-primary-dark: #1565C0;
+  --color-primary-light: #E3F2FD;
+  --color-success: #4CAF50;
+  --color-warning: #FF9800;
+  --color-danger: #F44336;
+  --color-gray-50: #FAFAFA;
+  --color-gray-100: #F5F5F5;
+  --color-gray-200: #EEEEEE;
+  --color-gray-300: #E0E0E0;
+  --color-gray-400: #BDBDBD;
+  --color-gray-500: #9E9E9E;
+  --color-gray-600: #757575;
+  --color-gray-700: #616161;
+  --color-gray-800: #424242;
+  --color-gray-900: #212121;
 }
 
 /* 커스텀 컴포넌트 스타일 */
 .btn-primary {
-  @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
 }
 
 .btn-secondary {
-  @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+  @apply bg-white hover:bg-gray-50 text-gray-800 font-medium py-3 px-6 rounded-lg transition-all duration-200 border border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+}
+
+.btn-success {
+  @apply bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2;
+}
+
+.btn-icon {
+  @apply p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300;
 }
 
 .input-field {
-  @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500;
+  @apply block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 transition-all duration-200;
+}
+
+.label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
 }
 
 .card {
-  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+  @apply bg-white rounded-xl shadow-md border border-gray-100 p-6 hover:shadow-lg transition-shadow duration-300;
+}
+
+.card-flat {
+  @apply bg-white rounded-xl border border-gray-200 p-6;
 }
 
 /* 드래그 앤 드롭 영역 */
 .dropzone {
-  @apply border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors duration-200 cursor-pointer;
+  @apply relative border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 cursor-pointer;
 }
 
 .dropzone.active {
-  @apply border-primary-500 bg-primary-50;
+  @apply border-blue-500 bg-blue-50;
 }
 
-/* 양식 필드 오버레이 */
-.form-field-overlay {
-  @apply absolute border-2 border-primary-500 bg-primary-100 bg-opacity-50 cursor-move;
+.dropzone-content {
+  @apply flex flex-col items-center justify-center space-y-4;
 }
 
-.form-field-overlay:hover {
-  @apply bg-primary-200 bg-opacity-70;
+/* 양식 필드 */
+.form-field-item {
+  @apply absolute border-2 border-blue-500 bg-blue-100 bg-opacity-30 rounded cursor-move hover:bg-opacity-50 transition-all duration-200;
 }
 
-.form-field-overlay.selected {
-  @apply border-primary-600 bg-primary-200 bg-opacity-80;
+.form-field-item.selected {
+  @apply border-blue-600 bg-blue-200 bg-opacity-50 ring-2 ring-blue-400 ring-opacity-50;
+}
+
+.form-field-handle {
+  @apply absolute -top-2 -right-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs cursor-pointer hover:bg-blue-700;
 }
 
 /* 사이드바 */
 .sidebar {
-  @apply fixed inset-y-0 left-0 w-64 bg-white shadow-lg border-r border-gray-200 transform transition-transform duration-300 ease-in-out;
+  @apply fixed inset-y-0 left-0 w-80 bg-white shadow-xl border-r border-gray-200 transform transition-transform duration-300 ease-in-out z-40 overflow-y-auto;
 }
 
 .sidebar.closed {
   @apply -translate-x-full;
 }
 
-/* 반응형 유틸리티 */
-.container {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+.sidebar-header {
+  @apply p-6 border-b border-gray-200;
+}
+
+.sidebar-nav {
+  @apply p-4;
+}
+
+.sidebar-nav-item {
+  @apply flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-all duration-200 cursor-pointer;
+}
+
+.sidebar-nav-item.active {
+  @apply bg-blue-50 text-blue-600 font-medium;
+}
+
+/* 헤더 */
+.header {
+  @apply fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-30 flex items-center px-6;
+}
+
+.header-content {
+  @apply flex items-center justify-between w-full;
+}
+
+/* 메인 콘텐츠 */
+.main-content {
+  @apply pt-16 min-h-screen bg-gray-50;
+}
+
+.page-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+}
+
+/* 대시보드 그리드 */
+.dashboard-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+}
+
+.stat-card {
+  @apply bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300;
+}
+
+.stat-value {
+  @apply text-3xl font-bold text-gray-900;
+}
+
+.stat-label {
+  @apply text-sm text-gray-600 mt-1;
+}
+
+.stat-change {
+  @apply text-sm mt-2 flex items-center space-x-1;
+}
+
+.stat-change.positive {
+  @apply text-green-600;
+}
+
+.stat-change.negative {
+  @apply text-red-600;
+}
+
+/* 테이블 */
+.table-container {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden;
+}
+
+.table {
+  @apply w-full divide-y divide-gray-200;
+}
+
+.table-header {
+  @apply bg-gray-50;
+}
+
+.table-row {
+  @apply hover:bg-gray-50 transition-colors duration-150;
+}
+
+.table-cell {
+  @apply px-6 py-4 text-sm text-gray-900;
+}
+
+.table-header-cell {
+  @apply px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+/* 상태 배지 */
+.badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+}
+
+.badge-blue {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.badge-green {
+  @apply bg-green-100 text-green-800;
+}
+
+.badge-yellow {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.badge-red {
+  @apply bg-red-100 text-red-800;
+}
+
+.badge-gray {
+  @apply bg-gray-100 text-gray-800;
+}
+
+/* 탭 */
+.tabs {
+  @apply flex space-x-1 border-b border-gray-200;
+}
+
+.tab {
+  @apply px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-gray-300 transition-all duration-200 cursor-pointer;
+}
+
+.tab.active {
+  @apply text-blue-600 border-blue-600;
+}
+
+/* 모달 */
+.modal-backdrop {
+  @apply fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center;
+}
+
+.modal {
+  @apply bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto;
+}
+
+.modal-header {
+  @apply px-6 py-4 border-b border-gray-200;
+}
+
+.modal-body {
+  @apply px-6 py-4;
+}
+
+.modal-footer {
+  @apply px-6 py-4 border-t border-gray-200 flex justify-end space-x-3;
+}
+
+/* 스텝 인디케이터 */
+.steps {
+  @apply flex items-center justify-between;
+}
+
+.step {
+  @apply flex items-center;
+}
+
+.step-number {
+  @apply w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-medium;
+}
+
+.step.active .step-number {
+  @apply bg-blue-600 text-white;
+}
+
+.step.completed .step-number {
+  @apply bg-green-500 text-white;
+}
+
+.step-label {
+  @apply ml-3 text-sm font-medium text-gray-600;
+}
+
+.step.active .step-label {
+  @apply text-blue-600;
+}
+
+.step-connector {
+  @apply flex-1 h-0.5 bg-gray-300 mx-4;
+}
+
+.step.completed + .step-connector {
+  @apply bg-green-500;
 }
 
 /* 로딩 애니메이션 */
 .spinner {
-  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600;
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600;
+}
+
+.skeleton {
+  @apply animate-pulse bg-gray-200 rounded;
 }
 
 /* 토스트 알림 */
 .toast {
-  @apply fixed top-4 right-4 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50 max-w-sm;
+  @apply fixed top-4 right-4 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50 max-w-sm animate-slide-in;
 }
 
 .toast.success {
@@ -84,4 +310,48 @@ body {
 
 .toast.error {
   @apply border-red-200 bg-red-50;
+}
+
+.toast.warning {
+  @apply border-yellow-200 bg-yellow-50;
+}
+
+/* 애니메이션 */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* 반응형 유틸리티 */
+@media (max-width: 768px) {
+  .sidebar {
+    @apply w-full;
+  }
+  
+  .modal {
+    @apply max-w-full rounded-none h-full max-h-full;
+  }
 }
