@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { createClientComponentClient, createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -10,9 +9,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // 클라이언트 컴포넌트용
 export const createSupabaseClient = () => createClientComponentClient()
-
-// 서버 컴포넌트용
-export const createSupabaseServerClient = () => createServerComponentClient({ cookies })
 
 // 데이터베이스 타입 정의
 export type Database = {
