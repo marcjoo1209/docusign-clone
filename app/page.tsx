@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/components/AuthProvider'
+import { useAuth } from '../components/AuthProvider'
 import Link from 'next/link'
 import { FileText, Users, BarChart, Shield } from 'lucide-react'
 
