@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../components/AuthProvider'
 import Link from 'next/link'
@@ -11,25 +11,28 @@ import {
 } from 'lucide-react'
 
 export default function HomePage() {
+  const [mounted, setMounted] = useState(false)
   const { user, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && user) {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted && !loading && user) {
       router.push('/dashboard')
     }
-  }, [user, loading, router])
+  }, [user, loading, router, mounted])
 
-  if (loading) {
+  // 항상 콘텐츠를 표시 (로딩 중이어도)
+  // 로그인한 사용자는 대시보드로 리다이렉트됨
+  if (!mounted || (user && !loading)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="spinner"></div>
       </div>
     )
-  }
-
-  if (user) {
-    return null // 대시보드로 리다이렉트 중
   }
 
   return (

@@ -25,59 +25,41 @@ export function useAuth() {
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const supabase = createSupabaseClient()
 
   useEffect(() => {
-    // 테스트 사용자 확인
-    try {
-      const isTestUser = localStorage.getItem('isTestUser')
-      if (isTestUser === 'true') {
-        const testUser = { 
-          id: 'test-user-id',
-          email: 'test@example.com',
-          user_metadata: { full_name: '테스트 사용자' }
-        } as any
-        setUser(testUser)
+    setMounted(true)
+    
+    // 클라이언트 사이드에서만 실행
+    if (typeof window === 'undefined') {
+      setLoading(false)
+      return
+    }
+
+    // 즉시 로딩 false로 설정 (테스트 환경)
+    const initAuth = async () => {
+      try {
+        // 테스트 사용자 확인
+        const isTestUser = localStorage.getItem('isTestUser')
+        if (isTestUser === 'true') {
+          const testUser = { 
+            id: 'test-user-id',
+            email: 'test@example.com',
+            user_metadata: { full_name: '테스트 사용자' }
+          } as any
+          setUser(testUser)
+        }
+      } catch (e) {
+        console.log('Auth initialization error:', e)
+      } finally {
+        // 항상 로딩을 false로 설정
         setLoading(false)
-        return
       }
-    } catch (e) {
-      console.error('localStorage error:', e)
     }
 
-    // 타임아웃 설정 - 3초 후에는 무조건 로딩 false
-    const timeout = setTimeout(() => {
-      console.log('Auth check timeout - setting loading to false')
-      setLoading(false)
-    }, 3000)
-
-    // 현재 세션 확인
-    supabase.auth.getSession()
-      .then((response: any) => {
-        setUser(response.data.session?.user ?? null)
-        setLoading(false)
-        clearTimeout(timeout)
-      })
-      .catch((error: any) => {
-        console.error('getSession error:', error)
-        setUser(null)
-        setLoading(false)
-        clearTimeout(timeout)
-      })
-
-    // 인증 상태 변경 리스너
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    return () => {
-      subscription.unsubscribe()
-      clearTimeout(timeout)
-    }
-  }, [supabase.auth])
+    initAuth()
+  }, [])
 
   const signIn = async (email: string, password: string) => {
     console.log('signIn called with:', email, password)
