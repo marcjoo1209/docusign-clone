@@ -90,7 +90,7 @@ export default function HomePage() {
               <span>무료로 시작하기</span>
               <ArrowRight className="h-5 w-5" />
             </Link>
-            <Link href="/demo" className="btn-secondary text-lg px-8 py-4">
+            <Link href="/auth/signin?demo=true" className="btn-secondary text-lg px-8 py-4">
               데모 체험하기
             </Link>
           </div>

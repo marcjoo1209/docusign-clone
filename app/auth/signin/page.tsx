@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '../../../components/AuthProvider'
 import Link from 'next/link'
 import { 
@@ -11,12 +11,49 @@ import {
 
 export default function SignInPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { signIn } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // 데모 모드 확인 및 자동 로그인
+  useEffect(() => {
+    if (searchParams.get('demo') === 'true') {
+      setEmail('test@example.com')
+      setPassword('test1234!')
+      // 자동으로 로그인 시도
+      setTimeout(() => {
+        handleDemoLogin()
+      }, 500)
+    }
+  }, [searchParams])
+
+  const handleDemoLogin = async () => {
+    setLoading(true)
+    setError('')
+    
+    try {
+      const result = await signIn('test@example.com', 'test1234!')
+      console.log('Demo login result:', result)
+      
+      if (result?.error) {
+        setError('데모 로그인 중 오류가 발생했습니다.')
+        setLoading(false)
+      } else {
+        setLoading(false)
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 100)
+      }
+    } catch (err) {
+      console.error('Demo login error:', err)
+      setError('데모 로그인 중 오류가 발생했습니다.')
+      setLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,26 +92,45 @@ export default function SignInPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* 테스트 계정 안내 */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <div className="flex items-start space-x-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-blue-900">테스트 계정</p>
-              <p className="text-sm text-blue-700 mt-1">
-                이메일: test@example.com<br />
-                비밀번호: test1234!
-              </p>
-              <button
-                type="button"
-                onClick={fillTestAccount}
-                className="mt-2 text-sm text-blue-600 hover:text-blue-700 underline"
-              >
-                테스트 계정으로 자동 입력
-              </button>
+        {/* 테스트 계정 안내 또는 데모 모드 안내 */}
+        {searchParams.get('demo') === 'true' ? (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <div className="flex items-start space-x-3">
+              <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-green-900">데모 모드 자동 로그인 중</p>
+                <p className="text-sm text-green-700 mt-1">
+                  테스트 계정으로 자동 로그인하고 있습니다...
+                </p>
+                {loading && (
+                  <div className="mt-2">
+                    <div className="spinner h-4 w-4"></div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="flex items-start space-x-3">
+              <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-blue-900">테스트 계정</p>
+                <p className="text-sm text-blue-700 mt-1">
+                  이메일: test@example.com<br />
+                  비밀번호: test1234!
+                </p>
+                <button
+                  type="button"
+                  onClick={fillTestAccount}
+                  className="mt-2 text-sm text-blue-600 hover:text-blue-700 underline"
+                >
+                  테스트 계정으로 자동 입력
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 로고 */}
         <div className="text-center mb-8">
