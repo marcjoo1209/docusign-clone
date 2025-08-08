@@ -237,23 +237,15 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         let authProvider: any = provider
         
         if (provider === 'naver' || provider === 'kakao') {
-          // Naver와 Kakao는 직접 OAuth URL로 이동
-          const redirectUrl = `${window.location.origin}/auth/callback`
-          let oauthUrl = ''
-          
-          if (provider === 'naver') {
-            const naverClientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID || 'mxBDhBRQBz2pBAhgnTIc'
-            const state = Math.random().toString(36).substring(7)
-            oauthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${naverClientId}&redirect_uri=${encodeURIComponent(redirectUrl)}&state=${state}`
-          } else if (provider === 'kakao') {
-            const kakaoClientId = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID || 'c465064268bdc55d75be844b4fcf2b50'
-            oauthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${kakaoClientId}&redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&scope=profile_nickname,profile_image,account_email`
-          }
-          
-          if (oauthUrl) {
-            window.location.href = oauthUrl
-            return { data: { url: oauthUrl }, error: null }
-          }
+          // 네이버와 카카오는 테스트 모드로 처리
+          const result = await signInWithTestMode(provider)
+          return result
+        }
+        
+        if (provider === 'google') {
+          // 구글의 경우 테스트 모드로 처리
+          const result = await signInWithTestMode(provider)
+          return result
         }
         
         if (provider === 'instagram') {
@@ -264,8 +256,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: authProvider,
           options: {
-            redirectTo: `${window.location.origin}/auth/callback`,
-            scopes: provider === 'google' ? 'email profile' : undefined
+            redirectTo: `${window.location.origin}/auth/callback`
           }
         })
         

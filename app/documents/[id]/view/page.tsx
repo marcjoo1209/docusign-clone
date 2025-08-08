@@ -68,7 +68,10 @@ export default function DocumentViewPage() {
       }
     }
 
-    loadDocument()
+    // 클라이언트 사이드에서만 실행
+    if (typeof window !== 'undefined') {
+      loadDocument()
+    }
   }, [documentId, user, router])
 
   const copyToClipboard = () => {
