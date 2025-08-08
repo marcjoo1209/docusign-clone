@@ -80,7 +80,9 @@ export default function SocialAuthButtons({ mode, onSuccess }: SocialAuthButtons
 
         {/* Naver */}
         <button
-          onClick={() => handleSocialAuth('naver')}
+          onClick={() => {
+            alert('네이버 로그인은 개발자 사이트에서 콜백 URL 설정이 필요합니다.\n\n현재 필요한 콜백 URL:\nhttps://docusign-clone.vercel.app/auth/callback\n\n네이버 개발자센터에서 위 URL을 등록해주세요.')
+          }}
           disabled={loading !== null}
           className="flex items-center justify-center px-4 py-2.5 bg-[#03C75A] text-white rounded-lg hover:bg-[#02b351] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -96,7 +98,9 @@ export default function SocialAuthButtons({ mode, onSuccess }: SocialAuthButtons
 
         {/* Kakao */}
         <button
-          onClick={() => handleSocialAuth('kakao')}
+          onClick={() => {
+            alert('카카오 로그인은 개발자 사이트에서 콜백 URL 설정이 필요합니다.\n\n현재 필요한 콜백 URL:\nhttps://docusign-clone.vercel.app/auth/callback\n\n카카오 개발자센터에서 위 URL을 등록해주세요.')
+          }}
           disabled={loading !== null}
           className="flex items-center justify-center px-4 py-2.5 bg-[#FEE500] text-[#000000D9] rounded-lg hover:bg-[#fdd800] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
