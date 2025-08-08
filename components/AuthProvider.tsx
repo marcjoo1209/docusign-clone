@@ -42,15 +42,15 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     }
 
     // 현재 세션 확인
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
+    supabase.auth.getSession().then((response: any) => {
+      setUser(response.data.session?.user ?? null)
       setLoading(false)
     })
 
     // 인증 상태 변경 리스너
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
       setUser(session?.user ?? null)
       setLoading(false)
     })
