@@ -227,9 +227,23 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         let authProvider: any = provider
         
         if (provider === 'naver' || provider === 'kakao') {
-          // Naver와 Kakao는 커스텀 OAuth 처리
-          window.location.href = `/api/auth/${provider}?action=login`
-          return { data: { url: `/api/auth/${provider}?action=login` }, error: null }
+          // Naver와 Kakao는 직접 OAuth URL로 이동
+          const redirectUrl = `${window.location.origin}/auth/callback`
+          let oauthUrl = ''
+          
+          if (provider === 'naver') {
+            const naverClientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID || 'mxBDhBRQBz2pBAhgnTIc'
+            const state = Math.random().toString(36).substring(7)
+            oauthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${naverClientId}&redirect_uri=${encodeURIComponent(redirectUrl)}&state=${state}`
+          } else if (provider === 'kakao') {
+            const kakaoClientId = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID || 'c465064268bdc55d75be844b4fcf2b50'
+            oauthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${kakaoClientId}&redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&scope=profile_nickname,profile_image,account_email`
+          }
+          
+          if (oauthUrl) {
+            window.location.href = oauthUrl
+            return { data: { url: oauthUrl }, error: null }
+          }
         }
         
         if (provider === 'instagram') {
