@@ -23,19 +23,13 @@ export default function SignInPage() {
     setLoading(true)
     setError('')
 
-    // 테스트 계정 처리
-    if (email === 'test@example.com' && password === 'test1234!') {
-      setLoading(false)
-      router.push('/dashboard')
-      return
-    }
-
-    const { error } = await signIn(email, password)
+    const result = await signIn(email, password)
     
-    if (error) {
+    if (result.error) {
       setError('이메일 또는 비밀번호가 올바르지 않습니다.')
       setLoading(false)
     } else {
+      setLoading(false)
       router.push('/dashboard')
     }
   }
