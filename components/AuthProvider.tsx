@@ -66,6 +66,14 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
           const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event: any, session: any) => {
               console.log('Auth state changed:', event, session?.user)
+              
+              // 테스트 사용자인 경우 Supabase 인증 상태 변경을 무시
+              const isTestUser = localStorage.getItem('isTestUser') === 'true'
+              if (isTestUser) {
+                console.log('Test user detected, ignoring Supabase auth state change')
+                return
+              }
+              
               setUser(session?.user ?? null)
               
               if (session?.user) {
