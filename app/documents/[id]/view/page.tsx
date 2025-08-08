@@ -16,66 +16,98 @@ export default function DocumentViewPage() {
   const { user } = useAuth()
   const documentId = params.id
   
+  const [document, setDocument] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
   const [activeTab, setActiveTab] = useState('responses')
   const [showShareModal, setShowShareModal] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
 
-  // 임시 문서 데이터
-  const document = {
-    id: documentId,
-    title: '근로계약서_김철수',
-    status: 'active',
-    createdAt: '2024-01-15 09:30',
-    updatedAt: '2024-01-15 14:20',
-    shareUrl: `https://docusign-clone.vercel.app/forms/${documentId}`,
-    totalViews: 42,
-    uniqueViews: 15,
-    responses: 8,
-    completionRate: 73,
-    avgCompletionTime: '5분 30초',
-    fields: [
-      { name: '성명', type: 'text', required: true },
-      { name: '이메일', type: 'email', required: true },
-      { name: '연락처', type: 'phone', required: true },
-      { name: '입사일', type: 'date', required: true },
-      { name: '서명', type: 'signature', required: true }
-    ],
-    responseData: [
-      {
-        id: 1,
-        respondent: '김철수',
-        email: 'kim@example.com',
-        submittedAt: '2024-01-15 10:45',
-        status: 'completed',
-        data: {
-          '성명': '김철수',
-          '이메일': 'kim@example.com',
-          '연락처': '010-1234-5678',
-          '입사일': '2024-02-01',
-          '서명': '완료'
-        } as Record<string, string>
-      },
-      {
-        id: 2,
-        respondent: '이영희',
-        email: 'lee@example.com',
-        submittedAt: '2024-01-15 11:30',
-        status: 'completed',
-        data: {
-          '성명': '이영희',
-          '이메일': 'lee@example.com',
-          '연락처': '010-9876-5432',
-          '입사일': '2024-02-01',
-          '서명': '완료'
-        } as Record<string, string>
+  useEffect(() => {
+    if (!user) {
+      router.push('/auth/signin')
+      return
+    }
+
+    // 문서 데이터 로드
+    const loadDocument = () => {
+      try {
+        const userDocuments = JSON.parse(localStorage.getItem('userDocuments') || '[]')
+        const foundDoc = userDocuments.find((doc: any) => doc.id.toString() === documentId)
+        
+        if (foundDoc) {
+          const mockResponses = Array.from({ length: foundDoc.responses || 0 }, (_, i) => ({
+            id: i + 1,
+            respondent: `사용자 ${i + 1}`,
+            email: `user${i + 1}@example.com`,
+            submittedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toLocaleString(),
+            status: 'completed',
+            data: foundDoc.fields?.reduce((acc: any, field: any) => {
+              acc[field.label] = `샘플 데이터 ${i + 1}`
+              return acc
+            }, {}) || {}
+          }))
+          
+          setDocument({
+            ...foundDoc,
+            shareUrl: `${window.location.origin}${foundDoc.shareUrl}`,
+            totalViews: foundDoc.views || Math.floor(Math.random() * 100) + 10,
+            uniqueViews: Math.floor((foundDoc.views || 10) * 0.7),
+            completionRate: foundDoc.responses > 0 ? Math.round((foundDoc.responses / (foundDoc.views || 10)) * 100) : 0,
+            avgCompletionTime: '5분 30초',
+            responseData: mockResponses
+          })
+        } else {
+          setNotFound(true)
+        }
+      } catch (error) {
+        console.error('Error loading document:', error)
+        setNotFound(true)
+      } finally {
+        setLoading(false)
       }
-    ]
-  }
+    }
+
+    loadDocument()
+  }, [documentId, user, router])
 
   const copyToClipboard = () => {
+    if (!document) return
     navigator.clipboard.writeText(document.shareUrl)
     setCopiedLink(true)
     setTimeout(() => setCopiedLink(false), 2000)
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="spinner mb-4"></div>
+          <p>문서를 불러오는 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (notFound || !document) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full text-center">
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="w-20 h-20 bg-red-100 rounded-full mx-auto mb-6 flex items-center justify-center">
+              <FileText className="h-10 w-10 text-red-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">문서를 찾을 수 없습니다</h1>
+            <p className="text-gray-600 mb-6">
+              요청하신 문서가 존재하지 않거나 접근 권한이 없습니다.
+            </p>
+            <Link href="/dashboard" className="btn-primary">
+              대시보드로 돌아가기
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const handleExport = (format: string) => {
@@ -103,7 +135,7 @@ export default function DocumentViewPage() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Link href={`/documents/${documentId}/edit`} className="btn-secondary flex items-center space-x-2">
+              <Link href={`/documents/edit/${documentId}`} className="btn-secondary flex items-center space-x-2">
                 <Edit2 className="h-4 w-4" />
                 <span>편집</span>
               </Link>
@@ -152,11 +184,11 @@ export default function DocumentViewPage() {
             <div className="flex items-center justify-between mb-4">
               <CheckCircle className="h-8 w-8 text-purple-500" />
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                document.status === 'active' 
+                document.status === 'pending' || document.status === 'completed'
                   ? 'bg-green-100 text-green-800' 
                   : 'bg-gray-100 text-gray-800'
               }`}>
-                {document.status === 'active' ? '활성' : '비활성'}
+                {document.status === 'pending' ? '활성' : document.status === 'completed' ? '완료' : '초안'}
               </span>
             </div>
             <div className="text-sm text-gray-600">상태</div>
@@ -233,16 +265,16 @@ export default function DocumentViewPage() {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">응답자</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">이메일</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">제출 시간</th>
-                        {document.fields.map((field) => (
-                          <th key={field.name} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                            {field.name}
+                        {document.fields && document.fields.map((field: any) => (
+                          <th key={field.label || field.name} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            {field.label || field.name}
                           </th>
                         ))}
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">작업</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {document.responseData.map((response) => (
+                      {document.responseData.map((response: any) => (
                         <tr key={response.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {response.respondent}
@@ -253,9 +285,9 @@ export default function DocumentViewPage() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {response.submittedAt}
                           </td>
-                          {document.fields.map((field) => (
-                            <td key={field.name} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {response.data[field.name]}
+                          {document.fields && document.fields.map((field: any) => (
+                            <td key={field.label || field.name} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {response.data[field.label || field.name]}
                             </td>
                           ))}
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -276,10 +308,10 @@ export default function DocumentViewPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-gray-50 rounded-lg p-6">
                     <h4 className="text-sm font-medium text-gray-700 mb-4">필드별 완료율</h4>
-                    {document.fields.map((field) => (
-                      <div key={field.name} className="mb-3">
+                    {document.fields && document.fields.map((field: any) => (
+                      <div key={field.label || field.name} className="mb-3">
                         <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-600">{field.name}</span>
+                          <span className="text-gray-600">{field.label || field.name}</span>
                           <span className="text-gray-900 font-medium">100%</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">

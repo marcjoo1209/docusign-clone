@@ -21,11 +21,25 @@ export default function SocialAuthButtons({ mode, onSuccess }: SocialAuthButtons
     setLoading(provider)
     try {
       const result = await signInWithProvider(provider)
-      if (result.data && onSuccess) {
-        onSuccess()
+      console.log('Social auth result:', result)
+      
+      if (result?.data?.user) {
+        console.log('Social auth success, redirecting...')
+        // 성공 시 자동으로 대시보드로 이동
+        setTimeout(() => {
+          if (onSuccess) {
+            onSuccess()
+          } else {
+            window.location.href = '/dashboard'
+          }
+        }, 100)
+      } else if (result?.error) {
+        console.error('Social auth error:', result.error)
+        alert(`${provider} 로그인 실패: ${result.error.message || '알 수 없는 오류'}`)
       }
     } catch (error) {
       console.error(`${provider} auth error:`, error)
+      alert(`${provider} 로그인 중 오류가 발생했습니다.`)
     } finally {
       setLoading(null)
     }

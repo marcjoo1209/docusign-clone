@@ -225,6 +225,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     
     // OAuth 로그인 시작 시 테스트 사용자 플래그 제거
     localStorage.removeItem('isTestUser')
+    localStorage.removeItem('currentUser')
     
     // Supabase가 설정되어 있는지 확인
     const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL && 
@@ -282,7 +283,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       }
     } else {
       // Supabase가 설정되지 않은 경우 테스트 모드
-      return signInWithTestMode(provider)
+      const result = await signInWithTestMode(provider)
+      return result
     }
   }
   
@@ -335,11 +337,13 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     users.push(mockUser)
     localStorage.setItem('registeredUsers', JSON.stringify(users))
     
+    // 사용자 설정 즉시 수행
     setUser(mockUser)
     localStorage.setItem('isTestUser', 'true')
     localStorage.setItem('currentUser', JSON.stringify(mockUser))
     
-    console.log(`${provider} user signed up:`, mockUser)
+    console.log(`${provider} user signed up and logged in:`, mockUser)
+    
     return { data: { user: mockUser, session: {} as any }, error: null }
   }
 

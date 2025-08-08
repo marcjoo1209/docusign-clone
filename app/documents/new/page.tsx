@@ -106,6 +106,101 @@ export default function NewDocumentPage() {
     setFields(fields.map(f => f.id === fieldId ? { ...f, ...updates } : f))
   }
 
+  // 문서 저장
+  const handleSave = () => {
+    if (!documentTitle.trim()) {
+      alert('문서 제목을 입력해주세요.')
+      return
+    }
+    
+    if (!documentImage) {
+      alert('문서를 업로드해주세요.')
+      return
+    }
+
+    const newDocument = {
+      id: Date.now(),
+      title: documentTitle,
+      status: 'draft',
+      createdAt: new Date().toISOString().split('T')[0],
+      responses: 0,
+      shareUrl: `/forms/${Date.now()}`,
+      fields: fields,
+      documentImage: documentImage,
+      uploadedFile: uploadedFile?.name || ''
+    }
+
+    // 기존 문서 목록에 추가
+    const existingDocs = JSON.parse(localStorage.getItem('userDocuments') || '[]')
+    const updatedDocs = [...existingDocs, newDocument]
+    localStorage.setItem('userDocuments', JSON.stringify(updatedDocs))
+    
+    alert('문서가 저장되었습니다!')
+    router.push('/dashboard')
+  }
+
+  // 미리보기
+  const handlePreview = () => {
+    if (!documentImage) {
+      alert('문서를 업로드해주세요.')
+      return
+    }
+    
+    // 임시 저장 후 미리보기
+    const previewDoc = {
+      id: 'preview',
+      title: documentTitle || '제목 없음',
+      fields: fields,
+      documentImage: documentImage
+    }
+    localStorage.setItem('previewDocument', JSON.stringify(previewDoc))
+    window.open('/forms/preview', '_blank')
+  }
+
+  // 공유
+  const handleShare = () => {
+    if (!documentTitle.trim()) {
+      alert('문서 제목을 입력해주세요.')
+      return
+    }
+    
+    if (!documentImage) {
+      alert('문서를 업로드해주세요.')
+      return
+    }
+
+    if (fields.length === 0) {
+      alert('최소 하나의 입력 필드를 추가해주세요.')
+      return
+    }
+
+    // 문서 저장 후 공유 URL 생성
+    const newDocument = {
+      id: Date.now(),
+      title: documentTitle,
+      status: 'pending',
+      createdAt: new Date().toISOString().split('T')[0],
+      responses: 0,
+      shareUrl: `/forms/${Date.now()}`,
+      fields: fields,
+      documentImage: documentImage,
+      uploadedFile: uploadedFile?.name || ''
+    }
+
+    const existingDocs = JSON.parse(localStorage.getItem('userDocuments') || '[]')
+    const updatedDocs = [...existingDocs, newDocument]
+    localStorage.setItem('userDocuments', JSON.stringify(updatedDocs))
+    
+    const shareUrl = `${window.location.origin}${newDocument.shareUrl}`
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      alert('공유 URL이 클립보드에 복사되었습니다!\n\n' + shareUrl)
+    }).catch(() => {
+      alert('공유 URL: ' + shareUrl)
+    })
+    
+    router.push('/dashboard')
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
@@ -125,15 +220,24 @@ export default function NewDocumentPage() {
               />
             </div>
             <div className="flex items-center space-x-3">
-              <button className="btn-secondary flex items-center space-x-2">
+              <button 
+                onClick={handlePreview}
+                className="btn-secondary flex items-center space-x-2"
+              >
                 <Eye className="h-4 w-4" />
                 <span>미리보기</span>
               </button>
-              <button className="btn-primary flex items-center space-x-2">
+              <button 
+                onClick={handleSave}
+                className="btn-primary flex items-center space-x-2"
+              >
                 <Save className="h-4 w-4" />
                 <span>저장</span>
               </button>
-              <button className="btn-success flex items-center space-x-2">
+              <button 
+                onClick={handleShare}
+                className="btn-success flex items-center space-x-2"
+              >
                 <Share2 className="h-4 w-4" />
                 <span>공유</span>
               </button>

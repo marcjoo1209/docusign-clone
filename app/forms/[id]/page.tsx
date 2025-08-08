@@ -11,25 +11,42 @@ export default function FormResponsePage() {
   const params = useParams()
   const formId = params.id
   
+  const [document, setDocument] = useState<any>(null)
   const [formData, setFormData] = useState<any>({})
   const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
 
-  // 임시 문서 데이터
-  const document = {
-    title: '근로계약서',
-    description: '본 계약서를 검토하시고 필요한 정보를 입력해주세요.',
-    company: 'ABC 주식회사',
-    fields: [
-      { id: 1, type: 'text', label: '성명', required: true, placeholder: '홍길동' },
-      { id: 2, type: 'email', label: '이메일', required: true, placeholder: 'example@email.com' },
-      { id: 3, type: 'phone', label: '연락처', required: true, placeholder: '010-0000-0000' },
-      { id: 4, type: 'date', label: '입사일', required: true },
-      { id: 5, type: 'signature', label: '서명', required: true },
-      { id: 6, type: 'checkbox', label: '위 내용에 동의합니다', required: true }
-    ]
-  }
+  useEffect(() => {
+    // 문서 데이터 로드
+    const loadDocument = () => {
+      try {
+        const userDocuments = JSON.parse(localStorage.getItem('userDocuments') || '[]')
+        const foundDoc = userDocuments.find((doc: any) => 
+          doc.shareUrl === `/forms/${formId}` || doc.id.toString() === formId
+        )
+        
+        if (foundDoc) {
+          setDocument({
+            ...foundDoc,
+            description: foundDoc.description || `${foundDoc.title} 문서를 작성해주세요.`,
+            company: '동의서 플랫폼'
+          })
+        } else {
+          setNotFound(true)
+        }
+      } catch (error) {
+        console.error('Error loading document:', error)
+        setNotFound(true)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadDocument()
+  }, [formId])
 
   const handleInputChange = (fieldId: number, value: any) => {
     setFormData({
@@ -47,12 +64,43 @@ export default function FormResponsePage() {
   }
 
   const isFormValid = () => {
-    return document.fields.every(field => {
+    if (!document || !document.fields) return false
+    return document.fields.every((field: any) => {
       if (field.required) {
         return formData[field.id] && formData[field.id] !== ''
       }
       return true
     })
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="spinner mb-4"></div>
+          <p>문서를 불러오는 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (notFound || !document) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full text-center">
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="w-20 h-20 bg-red-100 rounded-full mx-auto mb-6 flex items-center justify-center">
+              <FileText className="h-10 w-10 text-red-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">문서를 찾을 수 없습니다</h1>
+            <p className="text-gray-600 mb-6">
+              요청하신 문서가 존재하지 않거나 만료되었습니다.
+            </p>
+            <p className="text-sm text-gray-400">문서 ID: {formId}</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (isSubmitted) {
@@ -107,13 +155,13 @@ export default function FormResponsePage() {
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-gray-600">진행률</span>
             <span className="text-sm font-medium text-blue-600">
-              {Math.round((Object.keys(formData).length / document.fields.length) * 100)}%
+              {document.fields ? Math.round((Object.keys(formData).length / document.fields.length) * 100) : 0}%
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(Object.keys(formData).length / document.fields.length) * 100}%` }}
+              style={{ width: `${document.fields ? (Object.keys(formData).length / document.fields.length) * 100 : 0}%` }}
             />
           </div>
         </div>
@@ -131,7 +179,7 @@ export default function FormResponsePage() {
           {/* 입력 필드들 */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <form className="space-y-6">
-              {document.fields.map((field) => (
+              {document.fields && document.fields.map((field: any) => (
                 <div key={field.id}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {field.label}
@@ -212,8 +260,39 @@ export default function FormResponsePage() {
                         checked={formData[field.id] || false}
                         onChange={(e) => handleInputChange(field.id, e.target.checked)}
                       />
-                      <span className="text-gray-700">{field.label}</span>
+                      <span className="text-gray-700">{field.placeholder || field.label}</span>
                     </label>
+                  )}
+                  
+                  {field.type === 'radio' && (
+                    <div className="space-y-3">
+                      {(field.options || ['옵션 1', '옵션 2']).map((option: string, index: number) => (
+                        <label key={index} className="flex items-center space-x-3">
+                          <input
+                            type="radio"
+                            name={`field-${field.id}`}
+                            className="w-4 h-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                            value={option}
+                            checked={formData[field.id] === option}
+                            onChange={() => handleInputChange(field.id, option)}
+                          />
+                          <span className="text-gray-700">{option}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {field.type === 'number' && (
+                    <div className="relative">
+                      <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <input
+                        type="number"
+                        className="input-field pl-10"
+                        placeholder={field.placeholder || '숫자를 입력하세요'}
+                        value={formData[field.id] || ''}
+                        onChange={(e) => handleInputChange(field.id, e.target.value)}
+                      />
+                    </div>
                   )}
                 </div>
               ))}

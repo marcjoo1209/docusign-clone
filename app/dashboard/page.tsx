@@ -16,6 +16,8 @@ export default function DashboardPage() {
   const [documents, setDocuments] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(5) // 페이지당 아이템 수
   const [stats, setStats] = useState({
     total: 0,
     completed: 0,
@@ -154,6 +156,33 @@ export default function DashboardPage() {
     const matchesFilter = filterStatus === 'all' || doc.status === filterStatus
     return matchesSearch && matchesFilter
   })
+
+  // 페이지네이션
+  const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentDocuments = filteredDocuments.slice(startIndex, endIndex)
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
+  // 검색/필터 변경 시 페이지 리셋
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, filterStatus])
 
   const getStatusBadge = (status: string) => {
     switch(status) {
@@ -313,7 +342,7 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredDocuments.map((doc) => (
+                {currentDocuments.map((doc) => (
                   <tr key={doc.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -386,27 +415,84 @@ export default function DashboardPage() {
           </div>
 
           {/* 페이지네이션 */}
-          <div className="px-6 py-4 border-t border-gray-200">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-700">
-                총 <span className="font-medium">{filteredDocuments.length}</span>개 문서
-              </div>
-              <div className="flex space-x-2">
-                <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50">
-                  이전
-                </button>
-                <button className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm">
-                  1
-                </button>
-                <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50">
-                  2
-                </button>
-                <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50">
-                  다음
-                </button>
+          {filteredDocuments.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-700">
+                  총 <span className="font-medium">{filteredDocuments.length}</span>개 문서 중 
+                  <span className="font-medium">{startIndex + 1}-{Math.min(endIndex, filteredDocuments.length)}</span>개 표시
+                </div>
+                {totalPages > 1 && (
+                  <div className="flex items-center space-x-2">
+                    <button 
+                      onClick={goToPrevPage}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1 border rounded-md text-sm transition-colors ${
+                        currentPage === 1 
+                          ? 'border-gray-200 text-gray-400 cursor-not-allowed' 
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      이전
+                    </button>
+                    
+                    {/* 페이지 버튼들 */}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                      // 현재 페이지 주변 페이지만 보이기
+                      if (totalPages <= 5 || page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => goToPage(page)}
+                            className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                              currentPage === page
+                                ? 'bg-blue-600 text-white'
+                                : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        )
+                      } else if (page === currentPage - 2 || page === currentPage + 2) {
+                        return <span key={page} className="px-2 text-gray-400">…</span>
+                      }
+                      return null
+                    })}
+                    
+                    <button 
+                      onClick={goToNextPage}
+                      disabled={currentPage === totalPages}
+                      className={`px-3 py-1 border rounded-md text-sm transition-colors ${
+                        currentPage === totalPages 
+                          ? 'border-gray-200 text-gray-400 cursor-not-allowed' 
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      다음
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+          )}
+          
+          {/* 문서가 없을 때 */}
+          {filteredDocuments.length === 0 && (
+            <div className="px-6 py-12 text-center">
+              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">문서가 없습니다</h3>
+              <p className="text-gray-600 mb-4">
+                {searchTerm || filterStatus !== 'all' 
+                  ? '검색 조건에 맞는 문서가 없습니다.' 
+                  : '첫 번째 문서를 만들어보세요.'
+                }
+              </p>
+              <Link href="/documents/new" className="btn-primary inline-flex items-center space-x-2">
+                <Plus className="h-4 w-4" />
+                <span>새 문서 만들기</span>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>
