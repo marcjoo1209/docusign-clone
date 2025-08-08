@@ -18,8 +18,12 @@ export default function DashboardPage() {
   const [filterStatus, setFilterStatus] = useState('all')
 
   useEffect(() => {
+    // 로딩이 완료되고 사용자가 없으면 로그인 페이지로
     if (!loading && !user) {
+      console.log('No user found, redirecting to signin')
       router.push('/auth/signin')
+    } else if (user) {
+      console.log('User found in dashboard:', user)
     }
   }, [user, loading, router])
 

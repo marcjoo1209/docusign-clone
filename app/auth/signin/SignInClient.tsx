@@ -44,8 +44,11 @@ export default function SignInClient() {
         setError('데모 로그인 중 오류가 발생했습니다.')
         setLoading(false)
       } else {
-        // 로그인 성공 - window.location으로 확실하게 리다이렉트
-        window.location.href = '/dashboard'
+        // 로그인 성공 - 잠시 기다린 후 리다이렉트
+        console.log('Demo login successful, waiting for auth state update...')
+        setTimeout(() => {
+          window.location.href = '/dashboard'
+        }, 100)
       }
     } catch (err) {
       console.error('Demo login error:', err)
@@ -69,8 +72,11 @@ export default function SignInClient() {
         setError('이메일 또는 비밀번호가 올바르지 않습니다.')
         setLoading(false)
       } else {
-        // 로그인 성공 - window.location으로 확실하게 리다이렉트
-        window.location.href = '/dashboard'
+        // 로그인 성공 - 잠시 기다린 후 리다이렉트
+        console.log('Login successful, waiting for auth state update...')
+        setTimeout(() => {
+          window.location.href = '/dashboard'
+        }, 100)
       }
     } catch (err) {
       console.error('Login error:', err)
