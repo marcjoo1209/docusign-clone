@@ -38,15 +38,55 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       return
     }
 
-    // 즉시 로딩 false로 설정 (테스트 환경)
     const initAuth = async () => {
       try {
-        // 현재 로그인한 사용자 확인
-        const currentUser = localStorage.getItem('currentUser')
-        if (currentUser) {
-          const user = JSON.parse(currentUser)
-          setUser(user)
-          console.log('Restored user session:', user)
+        // Supabase 세션 확인
+        const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL && 
+                           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+                           process.env.NEXT_PUBLIC_SUPABASE_URL !== 'your-supabase-url'
+        
+        if (hasSupabase) {
+          // 실제 Supabase 세션 확인
+          const { data: { session }, error } = await supabase.auth.getSession()
+          
+          if (session?.user) {
+            setUser(session.user)
+            console.log('Supabase session restored:', session.user)
+          } else {
+            // Supabase 세션이 없으면 로컬 스토리지 확인
+            const currentUser = localStorage.getItem('currentUser')
+            if (currentUser) {
+              const user = JSON.parse(currentUser)
+              setUser(user)
+              console.log('Local session restored:', user)
+            }
+          }
+          
+          // 세션 변경 리스너 설정
+          const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            async (event, session) => {
+              console.log('Auth state changed:', event, session?.user)
+              setUser(session?.user ?? null)
+              
+              if (session?.user) {
+                localStorage.setItem('currentUser', JSON.stringify(session.user))
+              } else {
+                localStorage.removeItem('currentUser')
+              }
+            }
+          )
+          
+          return () => {
+            subscription.unsubscribe()
+          }
+        } else {
+          // Supabase가 설정되지 않은 경우 로컬 스토리지만 확인
+          const currentUser = localStorage.getItem('currentUser')
+          if (currentUser) {
+            const user = JSON.parse(currentUser)
+            setUser(user)
+            console.log('Test mode session restored:', user)
+          }
         }
       } catch (e) {
         console.log('Auth initialization error:', e)
@@ -175,7 +215,54 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const signInWithProvider = async (provider: 'google' | 'naver' | 'kakao' | 'instagram') => {
     console.log(`${provider} login initiated`)
     
-    // 테스트 환경에서는 실제 OAuth 없이 모의 로그인 처리
+    // Supabase가 설정되어 있는지 확인
+    const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL && 
+                        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+                        process.env.NEXT_PUBLIC_SUPABASE_URL !== 'your-supabase-url'
+    
+    if (hasSupabase) {
+      // 실제 OAuth 연동
+      try {
+        // provider 매핑 (Supabase는 naver, kakao를 직접 지원하지 않으므로 대체 처리)
+        let authProvider: any = provider
+        
+        if (provider === 'naver' || provider === 'kakao') {
+          // Naver와 Kakao는 커스텀 OAuth 처리
+          window.location.href = `/api/auth/${provider}?action=login`
+          return { data: { url: `/api/auth/${provider}?action=login` }, error: null }
+        }
+        
+        if (provider === 'instagram') {
+          // Instagram은 Facebook OAuth를 통해 처리
+          authProvider = 'facebook'
+        }
+        
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: authProvider,
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback`,
+            scopes: provider === 'google' ? 'email profile' : undefined
+          }
+        })
+        
+        if (error) {
+          console.error('OAuth error:', error)
+          return { data: null, error }
+        }
+        
+        return { data, error: null }
+      } catch (err) {
+        console.error('OAuth exception:', err)
+        return { data: null, error: err }
+      }
+    } else {
+      // Supabase가 설정되지 않은 경우 테스트 모드
+      return signInWithTestMode(provider)
+    }
+  }
+  
+  // 테스트 모드 로그인 (기존 로직)
+  const signInWithTestMode = async (provider: 'google' | 'naver' | 'kakao' | 'instagram') => {
     const providerNames = {
       google: 'Google',
       naver: '네이버',
