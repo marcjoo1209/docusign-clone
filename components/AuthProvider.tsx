@@ -40,15 +40,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     // 즉시 로딩 false로 설정 (테스트 환경)
     const initAuth = async () => {
       try {
-        // 테스트 사용자 확인
-        const isTestUser = localStorage.getItem('isTestUser')
-        if (isTestUser === 'true') {
-          const testUser = { 
-            id: 'test-user-id',
-            email: 'test@example.com',
-            user_metadata: { full_name: '테스트 사용자' }
-          } as any
-          setUser(testUser)
+        // 현재 로그인한 사용자 확인
+        const currentUser = localStorage.getItem('currentUser')
+        if (currentUser) {
+          const user = JSON.parse(currentUser)
+          setUser(user)
+          console.log('Restored user session:', user)
         }
       } catch (e) {
         console.log('Auth initialization error:', e)
@@ -64,7 +61,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const signIn = async (email: string, password: string) => {
     console.log('signIn called with:', email, password)
     
-    // 테스트 계정 처리 - Supabase 호출 완전히 건너뛰기
+    // 테스트 계정 처리
     if (email === 'test@example.com' && password === 'test1234!') {
       const testUser = { 
         id: 'test-user-id',
@@ -74,14 +71,34 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       setUser(testUser)
       console.log('Test user logged in:', testUser)
       localStorage.setItem('isTestUser', 'true')
-      // Supabase 호출 없이 바로 성공 반환
+      localStorage.setItem('currentUser', JSON.stringify(testUser))
       return { data: { user: testUser, session: {} as any }, error: null }
     }
 
-    // 로컬 스토리지에서 저장된 계정 확인
-    const savedUser = localStorage.getItem('testUser')
-    if (savedUser) {
-      try {
+    // 로컬 스토리지에서 모든 저장된 사용자 확인
+    try {
+      const usersData = localStorage.getItem('registeredUsers')
+      if (usersData) {
+        const users = JSON.parse(usersData)
+        const user = users.find((u: any) => u.email === email && u.password === password)
+        
+        if (user) {
+          const loggedInUser = {
+            id: user.id,
+            email: user.email,
+            user_metadata: { full_name: user.fullName }
+          } as any
+          setUser(loggedInUser)
+          localStorage.setItem('isTestUser', 'true')
+          localStorage.setItem('currentUser', JSON.stringify(loggedInUser))
+          console.log('User logged in:', loggedInUser)
+          return { data: { user: loggedInUser, session: {} as any }, error: null }
+        }
+      }
+      
+      // 구버전 호환성을 위한 단일 testUser 체크
+      const savedUser = localStorage.getItem('testUser')
+      if (savedUser) {
         const { email: savedEmail, password: savedPassword, fullName } = JSON.parse(savedUser)
         if (email === savedEmail && password === savedPassword) {
           const testUser = { 
@@ -91,52 +108,79 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
           } as any
           setUser(testUser)
           localStorage.setItem('isTestUser', 'true')
-          // Supabase 호출 없이 바로 성공 반환
+          localStorage.setItem('currentUser', JSON.stringify(testUser))
           return { data: { user: testUser, session: {} as any }, error: null }
         }
-      } catch (e) {
-        console.error('Error parsing saved user:', e)
       }
+    } catch (e) {
+      console.error('Error during login:', e)
     }
 
-    // 테스트 모드에서는 다른 계정 로그인 불가
-    console.log('Not a test account, login denied in test mode')
+    // 로그인 실패
+    console.log('Login failed - invalid credentials')
     return { 
       data: null, 
-      error: { message: '테스트 모드에서는 test@example.com 계정만 사용 가능합니다.' } 
+      error: { message: '이메일 또는 비밀번호가 올바르지 않습니다.' } 
     }
   }
 
   const signUp = async (email: string, password: string, fullName: string) => {
     // 테스트 환경에서는 로컬 스토리지만 사용
     if (email && password && fullName) {
-      const testUser = { 
+      const newUser = { 
         id: `user-${Date.now()}`,
         email: email,
+        password: password, // 실제로는 암호화해야 하지만 테스트 환경이므로 평문 저장
+        fullName: fullName,
         user_metadata: { full_name: fullName }
       } as any
-      setUser(testUser)
-      // 로컬 스토리지에 저장
-      localStorage.setItem('testUser', JSON.stringify({
-        email,
-        password,
-        fullName
-      }))
+      
+      // 기존 사용자 목록 가져오기
+      let users = []
+      try {
+        const existingUsers = localStorage.getItem('registeredUsers')
+        if (existingUsers) {
+          users = JSON.parse(existingUsers)
+          // 이미 등록된 이메일인지 확인
+          if (users.find((u: any) => u.email === email)) {
+            return { 
+              data: null, 
+              error: { message: '이미 등록된 이메일입니다.' } 
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Error loading users:', e)
+      }
+      
+      // 새 사용자 추가
+      users.push(newUser)
+      localStorage.setItem('registeredUsers', JSON.stringify(users))
+      
+      // 현재 사용자로 설정
+      setUser(newUser)
       localStorage.setItem('isTestUser', 'true')
+      localStorage.setItem('currentUser', JSON.stringify(newUser))
+      
       console.log('User signed up locally:', email)
       // Supabase 호출 없이 성공 반환
-      return { data: { user: testUser, session: {} as any }, error: null }
+      return { data: { user: newUser, session: {} as any }, error: null }
     }
 
-    // 실제 운영 환경에서만 Supabase 사용 (현재는 테스트 환경이므로 실행되지 않음)
-    return { data: null, error: { message: '테스트 환경입니다. 위 양식을 모두 입력해주세요.' } }
+    // 필수 정보 누락
+    return { data: null, error: { message: '모든 필드를 입력해주세요.' } }
   }
 
   const signOut = async () => {
     localStorage.removeItem('isTestUser')
-    localStorage.removeItem('testUser')
+    localStorage.removeItem('currentUser')
+    localStorage.removeItem('testUser') // 구버전 호환성
     setUser(null)
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut()
+    } catch (e) {
+      console.log('Signout error:', e)
+    }
   }
 
   const value = {
