@@ -9,6 +9,7 @@ import {
   CheckCircle, Upload, Share2, Download,
   ArrowRight, Zap, Lock, Globe
 } from 'lucide-react'
+import Image from 'next/image'
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false)
@@ -41,11 +42,8 @@ export default function HomePage() {
       <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <FileText className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-xl font-bold text-gray-900">동의서 플랫폼</h1>
+            <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
+              <Image src="/logo.svg" alt="동의서 플랫폼" width={120} height={40} />
             </Link>
             <nav className="hidden md:flex items-center space-x-8">
               <Link href="/features" className="text-gray-600 hover:text-blue-600 transition-colors">
@@ -302,11 +300,8 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <FileText className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-lg font-semibold text-white">동의서 플랫폼</span>
+              <div className="mb-4">
+                <Image src="/logo.svg" alt="동의서 플랫폼" width={120} height={40} className="brightness-0 invert" />
               </div>
               <p className="text-sm">
                 비즈니스 문서 작업을 더 스마트하게 만드는 전자서명 솔루션

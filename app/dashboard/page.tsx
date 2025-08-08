@@ -9,6 +9,7 @@ import {
   Clock, CheckCircle, XCircle, Eye, Edit2, Trash2,
   Download, Share2, BarChart3, TrendingUp, Users
 } from 'lucide-react'
+import Image from 'next/image'
 
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth()
@@ -204,13 +205,10 @@ export default function DashboardPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div 
-              className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity"
+              className="cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => router.push('/dashboard')}
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <FileText className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-xl font-bold text-gray-900">동의서 플랫폼</h1>
+              <Image src="/logo.svg" alt="동의서 플랫폼" width={120} height={40} />
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">{user.email}</span>
