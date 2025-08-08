@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useMemo } from 'react'
 import { User } from '@supabase/supabase-js'
 import { createSupabaseClient } from '../lib/supabase'
 
@@ -27,7 +27,9 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
-  const supabase = createSupabaseClient()
+  
+  // supabase 클라이언트를 메모이제이션하여 재생성 방지
+  const supabase = useMemo(() => createSupabaseClient(), [])
 
   useEffect(() => {
     setMounted(true)
@@ -105,7 +107,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     }
 
     initAuth()
-  }, [])
+  }, [supabase])
 
   const signIn = async (email: string, password: string) => {
     console.log('signIn called with:', email, password)
@@ -222,10 +224,6 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   const signInWithProvider = async (provider: 'google' | 'naver' | 'kakao' | 'instagram') => {
     console.log(`${provider} login initiated`)
-    
-    // OAuth 로그인 시작 시 테스트 사용자 플래그 제거
-    localStorage.removeItem('isTestUser')
-    localStorage.removeItem('currentUser')
     
     // Supabase가 설정되어 있는지 확인
     const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL && 
