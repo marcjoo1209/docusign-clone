@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseClient } from '../../../../lib/supabase'
+import { createSupabaseClient } from '../../../../../lib/supabase'
 
 const KAKAO_CLIENT_ID = process.env.KAKAO_CLIENT_ID || ''
 const KAKAO_CLIENT_SECRET = process.env.KAKAO_CLIENT_SECRET || ''

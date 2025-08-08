@@ -64,7 +64,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
           
           // 세션 변경 리스너 설정
           const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
+            async (event: any, session: any) => {
               console.log('Auth state changed:', event, session?.user)
               setUser(session?.user ?? null)
               

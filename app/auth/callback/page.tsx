@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createSupabaseClient } from '../../../lib/supabase'
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -74,5 +74,21 @@ export default function AuthCallbackPage() {
         <p className="text-gray-600 mt-2">잠시만 기다려주세요</p>
       </div>
     </div>
+  )
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="text-center">
+          <div className="spinner h-12 w-12 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900">로그인 처리 중...</h2>
+          <p className="text-gray-600 mt-2">잠시만 기다려주세요</p>
+        </div>
+      </div>
+    }>
+      <AuthCallbackContent />
+    </Suspense>
   )
 }

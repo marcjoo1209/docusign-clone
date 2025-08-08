@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseClient } from '../../../../lib/supabase'
+import { createSupabaseClient } from '../../../../../lib/supabase'
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID || ''
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || ''
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
         // 커스텀 처리가 필요합니다. 여기서는 세션을 직접 생성합니다.
         
         // 임시로 로컬 스토리지에 저장하고 리다이렉트
-        const userData = {
+        const userInfo = {
           id: `naver-${userData.response.id}`,
           email: email,
           user_metadata: {
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
         
         // 클라이언트 사이드에서 처리하도록 리다이렉트
         return NextResponse.redirect(
-          new URL(`/auth/callback?provider=naver&user=${encodeURIComponent(JSON.stringify(userData))}`, request.url)
+          new URL(`/auth/callback?provider=naver&user=${encodeURIComponent(JSON.stringify(userInfo))}`, request.url)
         )
       }
     }
