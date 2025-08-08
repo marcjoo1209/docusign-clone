@@ -8,6 +8,9 @@ const IS_TEST_MODE = !supabaseUrl || !supabaseAnonKey ||
                      supabaseUrl === 'your-supabase-url' ||
                      supabaseAnonKey === 'your-supabase-anon-key'
 
+// 싱글톤 패턴으로 Supabase 클라이언트 관리
+let supabaseInstance: any = null
+
 // 더미 Supabase 클라이언트 (테스트 모드용)
 const createDummyClient = () => ({
   auth: {
@@ -38,17 +41,22 @@ const createDummyClient = () => ({
   })
 })
 
-// 클라이언트 측 Supabase 클라이언트
-export const supabase = IS_TEST_MODE 
-  ? createDummyClient() as any
-  : createClient(supabaseUrl, supabaseAnonKey)
-
-// 클라이언트 컴포넌트용
-export const createSupabaseClient = () => {
-  if (IS_TEST_MODE) {
-    return createDummyClient() as any
+// 싱글톤 Supabase 클라이언트 생성
+const getSupabaseClient = () => {
+  if (!supabaseInstance) {
+    supabaseInstance = IS_TEST_MODE 
+      ? createDummyClient() as any
+      : createClient(supabaseUrl, supabaseAnonKey)
   }
-  return createClient(supabaseUrl, supabaseAnonKey)
+  return supabaseInstance
+}
+
+// 클라이언트 측 Supabase 클라이언트
+export const supabase = getSupabaseClient()
+
+// 클라이언트 컴포넌트용 (항상 같은 인스턴스 반환)
+export const createSupabaseClient = () => {
+  return getSupabaseClient()
 }
 
 // 데이터베이스 타입 정의
