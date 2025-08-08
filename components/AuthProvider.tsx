@@ -9,6 +9,7 @@ type AuthContextType = {
   loading: boolean
   signIn: (email: string, password: string) => Promise<any>
   signUp: (email: string, password: string, fullName: string) => Promise<any>
+  signInWithProvider: (provider: 'google' | 'naver' | 'kakao' | 'instagram') => Promise<any>
   signOut: () => Promise<void>
 }
 
@@ -171,6 +172,65 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     return { data: null, error: { message: '모든 필드를 입력해주세요.' } }
   }
 
+  const signInWithProvider = async (provider: 'google' | 'naver' | 'kakao' | 'instagram') => {
+    console.log(`${provider} login initiated`)
+    
+    // 테스트 환경에서는 실제 OAuth 없이 모의 로그인 처리
+    const providerNames = {
+      google: 'Google',
+      naver: '네이버',
+      kakao: '카카오',
+      instagram: 'Instagram'
+    }
+    
+    // 프로바이더별 테스트 사용자 생성
+    const mockUser = {
+      id: `${provider}-user-${Date.now()}`,
+      email: `test_${provider}@example.com`,
+      user_metadata: { 
+        full_name: `${providerNames[provider]} 사용자`,
+        provider: provider,
+        avatar_url: `https://ui-avatars.com/api/?name=${providerNames[provider]}&background=random`
+      }
+    } as any
+    
+    // SNS 로그인 사용자도 registeredUsers에 저장
+    let users = []
+    try {
+      const existingUsers = localStorage.getItem('registeredUsers')
+      if (existingUsers) {
+        users = JSON.parse(existingUsers)
+        // 이미 로그인한 적 있는 SNS 계정인지 확인
+        const existingUser = users.find((u: any) => 
+          u.email === mockUser.email && u.provider === provider
+        )
+        
+        if (existingUser) {
+          // 기존 사용자로 로그인
+          setUser(existingUser)
+          localStorage.setItem('isTestUser', 'true')
+          localStorage.setItem('currentUser', JSON.stringify(existingUser))
+          console.log(`${provider} user logged in:`, existingUser)
+          return { data: { user: existingUser, session: {} as any }, error: null }
+        }
+      }
+    } catch (e) {
+      console.error('Error loading users:', e)
+    }
+    
+    // 새 SNS 사용자 등록
+    mockUser.provider = provider
+    users.push(mockUser)
+    localStorage.setItem('registeredUsers', JSON.stringify(users))
+    
+    setUser(mockUser)
+    localStorage.setItem('isTestUser', 'true')
+    localStorage.setItem('currentUser', JSON.stringify(mockUser))
+    
+    console.log(`${provider} user signed up:`, mockUser)
+    return { data: { user: mockUser, session: {} as any }, error: null }
+  }
+
   const signOut = async () => {
     localStorage.removeItem('isTestUser')
     localStorage.removeItem('currentUser')
@@ -188,6 +248,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     loading,
     signIn,
     signUp,
+    signInWithProvider,
     signOut,
   }
 

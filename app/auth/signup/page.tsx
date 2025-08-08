@@ -8,6 +8,7 @@ import {
   FileText, User, Mail, Lock, Eye, EyeOff, 
   ArrowRight, CheckCircle, AlertCircle, Check, X
 } from 'lucide-react'
+import SocialAuthButtons from '../../../components/SocialAuthButtons'
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -238,6 +239,14 @@ export default function SignUpPage() {
               )}
             </button>
           </form>
+
+          {/* SNS 회원가입 버튼 */}
+          <div className="mt-6">
+            <SocialAuthButtons 
+              mode="signup" 
+              onSuccess={() => window.location.href = '/dashboard'}
+            />
+          </div>
 
           <div className="mt-6 text-center text-sm">
             <span className="text-gray-600">이미 계정이 있으신가요?</span>
