@@ -48,13 +48,15 @@ export default function SignUpPage() {
     setLoading(true)
     setError('')
 
-    const { error } = await signUp(formData.email, formData.password, formData.fullName)
+    const result = await signUp(formData.email, formData.password, formData.fullName)
+    console.log('SignUp result:', result)
     
-    if (error) {
-      setError(error.message || '회원가입 중 오류가 발생했습니다.')
+    if (result?.error) {
+      setError(result.error.message || '회원가입 중 오류가 발생했습니다.')
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      // 회원가입 성공 - window.location으로 확실하게 리다이렉트
+      window.location.href = '/dashboard'
     }
   }
 
