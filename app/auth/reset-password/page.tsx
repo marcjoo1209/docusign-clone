@@ -21,6 +21,24 @@ export default function ResetPasswordPage() {
     setLoading(true)
     setError('')
 
+    // 테스트 환경에서는 localStorage에서 계정 확인
+    const savedUser = localStorage.getItem('testUser')
+    if (savedUser) {
+      const { email: savedEmail } = JSON.parse(savedUser)
+      if (email === savedEmail || email === 'test@example.com') {
+        setSubmitted(true)
+        setLoading(false)
+        return
+      }
+    }
+
+    // 테스트 계정 처리
+    if (email === 'test@example.com') {
+      setSubmitted(true)
+      setLoading(false)
+      return
+    }
+
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/update-password`,

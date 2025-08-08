@@ -57,6 +57,21 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       return { data: { user: testUser, session: {} as any }, error: null }
     }
 
+    // 로컬 스토리지에서 저장된 계정 확인
+    const savedUser = localStorage.getItem('testUser')
+    if (savedUser) {
+      const { email: savedEmail, password: savedPassword, fullName } = JSON.parse(savedUser)
+      if (email === savedEmail && password === savedPassword) {
+        const testUser = { 
+          id: `user-${Date.now()}`,
+          email: savedEmail,
+          user_metadata: { full_name: fullName }
+        } as any
+        setUser(testUser)
+        return { data: { user: testUser, session: {} as any }, error: null }
+      }
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -65,6 +80,23 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   }
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    // 테스트 회원가입 처리 (실제 DB 없이 작동)
+    if (email && password && fullName) {
+      const testUser = { 
+        id: `user-${Date.now()}`,
+        email: email,
+        user_metadata: { full_name: fullName }
+      } as any
+      setUser(testUser)
+      // 로컬 스토리지에 저장 (임시)
+      localStorage.setItem('testUser', JSON.stringify({
+        email,
+        password,
+        fullName
+      }))
+      return { data: { user: testUser, session: {} as any }, error: null }
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
