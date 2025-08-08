@@ -29,23 +29,41 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     // 테스트 사용자 확인
-    const isTestUser = localStorage.getItem('isTestUser')
-    if (isTestUser === 'true') {
-      const testUser = { 
-        id: 'test-user-id',
-        email: 'test@example.com',
-        user_metadata: { full_name: '테스트 사용자' }
-      } as any
-      setUser(testUser)
-      setLoading(false)
-      return
+    try {
+      const isTestUser = localStorage.getItem('isTestUser')
+      if (isTestUser === 'true') {
+        const testUser = { 
+          id: 'test-user-id',
+          email: 'test@example.com',
+          user_metadata: { full_name: '테스트 사용자' }
+        } as any
+        setUser(testUser)
+        setLoading(false)
+        return
+      }
+    } catch (e) {
+      console.error('localStorage error:', e)
     }
 
-    // 현재 세션 확인
-    supabase.auth.getSession().then((response: any) => {
-      setUser(response.data.session?.user ?? null)
+    // 타임아웃 설정 - 3초 후에는 무조건 로딩 false
+    const timeout = setTimeout(() => {
+      console.log('Auth check timeout - setting loading to false')
       setLoading(false)
-    })
+    }, 3000)
+
+    // 현재 세션 확인
+    supabase.auth.getSession()
+      .then((response: any) => {
+        setUser(response.data.session?.user ?? null)
+        setLoading(false)
+        clearTimeout(timeout)
+      })
+      .catch((error: any) => {
+        console.error('getSession error:', error)
+        setUser(null)
+        setLoading(false)
+        clearTimeout(timeout)
+      })
 
     // 인증 상태 변경 리스너
     const {
@@ -55,7 +73,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [supabase.auth])
 
   const signIn = async (email: string, password: string) => {
