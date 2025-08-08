@@ -96,16 +96,11 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       }
     }
 
-    // 테스트 계정이 아닌 경우에만 Supabase 호출
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      return { data, error }
-    } catch (err) {
-      console.error('Supabase error:', err)
-      return { data: null, error: err }
+    // 테스트 모드에서는 다른 계정 로그인 불가
+    console.log('Not a test account, login denied in test mode')
+    return { 
+      data: null, 
+      error: { message: '테스트 모드에서는 test@example.com 계정만 사용 가능합니다.' } 
     }
   }
 

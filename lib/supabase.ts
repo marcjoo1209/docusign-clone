@@ -4,11 +4,47 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
+// 테스트 모드 설정 (항상 테스트 모드로 동작)
+const IS_TEST_MODE = true
+
+// 더미 Supabase 클라이언트 (테스트 모드용)
+const createDummyClient = () => ({
+  auth: {
+    getSession: async () => ({ data: { session: null }, error: null }),
+    signInWithPassword: async () => ({ 
+      data: null, 
+      error: { message: 'Test mode - use test@example.com' } 
+    }),
+    signUp: async () => ({ 
+      data: null, 
+      error: { message: 'Test mode - use local storage' } 
+    }),
+    signOut: async () => ({ error: null }),
+    resetPasswordForEmail: async () => ({ error: null }),
+    onAuthStateChange: () => ({
+      data: { subscription: { unsubscribe: () => {} } }
+    })
+  },
+  from: () => ({
+    select: () => ({ data: [], error: null }),
+    insert: () => ({ data: null, error: null }),
+    update: () => ({ data: null, error: null }),
+    delete: () => ({ data: null, error: null })
+  })
+})
+
 // 클라이언트 측 Supabase 클라이언트
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = IS_TEST_MODE 
+  ? createDummyClient() as any
+  : createClient(supabaseUrl, supabaseAnonKey)
 
 // 클라이언트 컴포넌트용
-export const createSupabaseClient = () => createClientComponentClient()
+export const createSupabaseClient = () => {
+  if (IS_TEST_MODE) {
+    return createDummyClient() as any
+  }
+  return createClientComponentClient()
+}
 
 // 데이터베이스 타입 정의
 export type Database = {
