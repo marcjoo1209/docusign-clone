@@ -23,14 +23,26 @@ export default function SignInPage() {
     setLoading(true)
     setError('')
 
-    const result = await signIn(email, password)
+    console.log('Login attempt with:', email, password)
     
-    if (result.error) {
-      setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+    try {
+      const result = await signIn(email, password)
+      console.log('SignIn result:', result)
+      
+      if (result?.error) {
+        setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+        setLoading(false)
+      } else {
+        setLoading(false)
+        // 약간의 지연 후 리다이렉트
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 100)
+      }
+    } catch (err) {
+      console.error('Login error:', err)
+      setError('로그인 중 오류가 발생했습니다.')
       setLoading(false)
-    } else {
-      setLoading(false)
-      router.push('/dashboard')
     }
   }
 
