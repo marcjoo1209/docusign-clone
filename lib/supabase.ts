@@ -3,8 +3,10 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// 테스트 모드 설정 (항상 테스트 모드로 동작)
-const IS_TEST_MODE = true
+// 테스트 모드 설정 (환경변수가 있으면 실제 Supabase 사용)
+const IS_TEST_MODE = !supabaseUrl || !supabaseAnonKey || 
+                     supabaseUrl === 'your-supabase-url' ||
+                     supabaseAnonKey === 'your-supabase-anon-key'
 
 // 더미 Supabase 클라이언트 (테스트 모드용)
 const createDummyClient = () => ({
@@ -17,6 +19,10 @@ const createDummyClient = () => ({
     signUp: async () => ({ 
       data: null, 
       error: { message: 'Test mode - use local storage' } 
+    }),
+    signInWithOAuth: async (options: any) => ({
+      data: { url: `/api/auth/${options.provider}?action=login` },
+      error: null
     }),
     signOut: async () => ({ error: null }),
     resetPasswordForEmail: async () => ({ error: null }),
