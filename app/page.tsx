@@ -45,13 +45,13 @@ export default function HomePage() {
               <h1 className="text-xl font-bold text-gray-900">문서서명 플랫폼</h1>
             </div>
             <nav className="hidden md:flex items-center space-x-8">
-              <Link href="#features" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Link href="/features" className="text-gray-600 hover:text-blue-600 transition-colors">
                 주요 기능
               </Link>
               <Link href="#how-it-works" className="text-gray-600 hover:text-blue-600 transition-colors">
                 사용 방법
               </Link>
-              <Link href="#pricing" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Link href="/pricing" className="text-gray-600 hover:text-blue-600 transition-colors">
                 요금제
               </Link>
             </nav>
@@ -287,7 +287,7 @@ export default function HomePage() {
               <span>무료 체험 시작</span>
               <ArrowRight className="h-5 w-5" />
             </Link>
-            <Link href="#contact" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-medium text-lg px-8 py-4 rounded-lg transition-colors duration-200">
+            <Link href="/contact" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-medium text-lg px-8 py-4 rounded-lg transition-colors duration-200">
               영업팀 문의
             </Link>
           </div>
@@ -313,30 +313,30 @@ export default function HomePage() {
             <div>
               <h5 className="text-white font-semibold mb-4">제품</h5>
               <ul className="space-y-2 text-sm">
-                <li><Link href="#features" className="hover:text-white transition-colors">기능</Link></li>
-                <li><Link href="#pricing" className="hover:text-white transition-colors">요금제</Link></li>
-                <li><Link href="#security" className="hover:text-white transition-colors">보안</Link></li>
-                <li><Link href="#integrations" className="hover:text-white transition-colors">연동</Link></li>
+                <li><Link href="/features" className="hover:text-white transition-colors">기능</Link></li>
+                <li><Link href="/pricing" className="hover:text-white transition-colors">요금제</Link></li>
+                <li><Link href="/security" className="hover:text-white transition-colors">보안</Link></li>
+                <li><Link href="/integrations" className="hover:text-white transition-colors">연동</Link></li>
               </ul>
             </div>
             
             <div>
               <h5 className="text-white font-semibold mb-4">회사</h5>
               <ul className="space-y-2 text-sm">
-                <li><Link href="#about" className="hover:text-white transition-colors">회사 소개</Link></li>
-                <li><Link href="#blog" className="hover:text-white transition-colors">블로그</Link></li>
-                <li><Link href="#careers" className="hover:text-white transition-colors">채용</Link></li>
-                <li><Link href="#contact" className="hover:text-white transition-colors">문의</Link></li>
+                <li><Link href="/about" className="hover:text-white transition-colors">회사 소개</Link></li>
+                <li><Link href="/blog" className="hover:text-white transition-colors">블로그</Link></li>
+                <li><Link href="/careers" className="hover:text-white transition-colors">채용</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors">문의</Link></li>
               </ul>
             </div>
             
             <div>
               <h5 className="text-white font-semibold mb-4">지원</h5>
               <ul className="space-y-2 text-sm">
-                <li><Link href="#help" className="hover:text-white transition-colors">도움말 센터</Link></li>
-                <li><Link href="#api" className="hover:text-white transition-colors">API 문서</Link></li>
-                <li><Link href="#status" className="hover:text-white transition-colors">서비스 상태</Link></li>
-                <li><Link href="#privacy" className="hover:text-white transition-colors">개인정보처리방침</Link></li>
+                <li><Link href="/help" className="hover:text-white transition-colors">도움말 센터</Link></li>
+                <li><Link href="/api" className="hover:text-white transition-colors">API 문서</Link></li>
+                <li><Link href="/status" className="hover:text-white transition-colors">서비스 상태</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors">개인정보처리방침</Link></li>
               </ul>
             </div>
           </div>
@@ -346,9 +346,9 @@ export default function HomePage() {
               © 2024 문서서명 플랫폼. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="#terms" className="text-sm hover:text-white transition-colors">이용약관</Link>
-              <Link href="#privacy" className="text-sm hover:text-white transition-colors">개인정보처리방침</Link>
-              <Link href="#cookies" className="text-sm hover:text-white transition-colors">쿠키 정책</Link>
+              <Link href="/terms" className="text-sm hover:text-white transition-colors">이용약관</Link>
+              <Link href="/privacy" className="text-sm hover:text-white transition-colors">개인정보처리방침</Link>
+              <Link href="/cookies" className="text-sm hover:text-white transition-colors">쿠키 정책</Link>
             </div>
           </div>
         </div>
