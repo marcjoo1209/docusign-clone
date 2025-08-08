@@ -13,6 +13,11 @@ export default function SocialAuthButtons({ mode, onSuccess }: SocialAuthButtons
   const [loading, setLoading] = useState<string | null>(null)
 
   const handleSocialAuth = async (provider: 'google' | 'naver' | 'kakao' | 'instagram') => {
+    if (provider === 'instagram') {
+      alert('Instagram 로그인은 개발중입니다.')
+      return
+    }
+
     setLoading(provider)
     try {
       const result = await signInWithProvider(provider)
