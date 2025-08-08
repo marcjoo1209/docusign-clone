@@ -223,6 +223,9 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const signInWithProvider = async (provider: 'google' | 'naver' | 'kakao' | 'instagram') => {
     console.log(`${provider} login initiated`)
     
+    // OAuth 로그인 시작 시 테스트 사용자 플래그 제거
+    localStorage.removeItem('isTestUser')
+    
     // Supabase가 설정되어 있는지 확인
     const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL && 
                         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&

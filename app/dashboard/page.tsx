@@ -16,6 +16,79 @@ export default function DashboardPage() {
   const [documents, setDocuments] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [stats, setStats] = useState({
+    total: 0,
+    completed: 0,
+    pending: 0,
+    expired: 0,
+    completionRate: 0,
+    avgTime: '0시간'
+  })
+
+  // 문서 데이터 로드
+  const loadDocuments = () => {
+    const savedDocuments = localStorage.getItem('userDocuments')
+    if (savedDocuments) {
+      const docs = JSON.parse(savedDocuments)
+      setDocuments(docs)
+      
+      // 통계 계산
+      const total = docs.length
+      const completed = docs.filter((doc: any) => doc.status === 'completed').length
+      const pending = docs.filter((doc: any) => doc.status === 'pending').length
+      const expired = docs.filter((doc: any) => doc.status === 'expired').length
+      const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
+      
+      setStats({
+        total,
+        completed,
+        pending,
+        expired,
+        completionRate,
+        avgTime: '2.3시간'
+      })
+    } else {
+      // 샘플 문서 데이터 생성
+      const sampleDocs = [
+        {
+          id: 1,
+          title: '근로계약서_김철수',
+          status: 'completed',
+          createdAt: '2024-01-15',
+          completedAt: '2024-01-15',
+          responses: 1,
+          shareUrl: '/forms/1'
+        },
+        {
+          id: 2,
+          title: '개인정보처리방침 동의서',
+          status: 'pending',
+          createdAt: '2024-01-14',
+          responses: 0,
+          shareUrl: '/forms/2'
+        },
+        {
+          id: 3,
+          title: '서비스 이용약관 동의',
+          status: 'completed',
+          createdAt: '2024-01-13',
+          completedAt: '2024-01-14',
+          responses: 3,
+          shareUrl: '/forms/3'
+        }
+      ]
+      localStorage.setItem('userDocuments', JSON.stringify(sampleDocs))
+      setDocuments(sampleDocs)
+      setStats({
+        total: 3,
+        completed: 2,
+        pending: 1,
+        expired: 0,
+        completionRate: 67,
+        avgTime: '2.3시간'
+      })
+    }
+  }
 
   useEffect(() => {
     // 로딩이 완료되고 사용자가 없으면 로그인 페이지로
@@ -24,6 +97,7 @@ export default function DashboardPage() {
       router.push('/auth/signin')
     } else if (user) {
       console.log('User found in dashboard:', user)
+      loadDocuments()
     }
   }, [user, loading, router])
 
@@ -39,45 +113,47 @@ export default function DashboardPage() {
     return null
   }
 
-  // 임시 데이터
-  const stats = {
-    total: 42,
-    completed: 38,
-    pending: 3,
-    expired: 1,
-    completionRate: 90.5,
-    avgTime: '2.3시간'
+  // 문서 삭제 핸들러
+  const handleDeleteDocument = (docId: number) => {
+    if (window.confirm('정말로 이 문서를 삭제하시겠습니까?')) {
+      const updatedDocs = documents.filter(doc => doc.id !== docId)
+      setDocuments(updatedDocs)
+      localStorage.setItem('userDocuments', JSON.stringify(updatedDocs))
+      
+      // 통계 업데이트
+      const total = updatedDocs.length
+      const completed = updatedDocs.filter((doc: any) => doc.status === 'completed').length
+      const pending = updatedDocs.filter((doc: any) => doc.status === 'pending').length
+      const expired = updatedDocs.filter((doc: any) => doc.status === 'expired').length
+      const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
+      
+      setStats({
+        total,
+        completed,
+        pending,
+        expired,
+        completionRate,
+        avgTime: '2.3시간'
+      })
+    }
   }
 
-  const mockDocuments = [
-    {
-      id: 1,
-      title: '근로계약서_김철수',
-      status: 'completed',
-      createdAt: '2024-01-15',
-      completedAt: '2024-01-15',
-      responses: 1,
-      views: 3
-    },
-    {
-      id: 2,
-      title: '임대차계약서_서울오피스',
-      status: 'pending',
-      createdAt: '2024-01-14',
-      completedAt: null,
-      responses: 0,
-      views: 5
-    },
-    {
-      id: 3,
-      title: 'NDA_프로젝트A',
-      status: 'completed',
-      createdAt: '2024-01-13',
-      completedAt: '2024-01-14',
-      responses: 2,
-      views: 8
-    }
-  ]
+  // URL 복사 핸들러
+  const handleCopyShareUrl = (shareUrl: string) => {
+    const fullUrl = `${window.location.origin}${shareUrl}`
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      alert('공유 URL이 클립보드에 복사되었습니다!')
+    }).catch(() => {
+      alert('URL 복사에 실패했습니다.')
+    })
+  }
+
+  // 문서 필터링
+  const filteredDocuments = documents.filter(doc => {
+    const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesFilter = filterStatus === 'all' || doc.status === filterStatus
+    return matchesSearch && matchesFilter
+  })
 
   const getStatusBadge = (status: string) => {
     switch(status) {
@@ -98,11 +174,14 @@ export default function DashboardPage() {
       <header className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-3">
+            <div 
+              className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => router.push('/dashboard')}
+            >
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
                 <FileText className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-gray-900">문서서명 플랫폼</h1>
+              <h1 className="text-xl font-bold text-gray-900">동의서 플랫폼</h1>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">{user.email}</span>
@@ -234,7 +313,7 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {mockDocuments.map((doc) => (
+                {filteredDocuments.map((doc) => (
                   <tr key={doc.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -254,23 +333,48 @@ export default function DashboardPage() {
                       {doc.responses}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {doc.views}
+                      {doc.views || Math.floor(Math.random() * 10) + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
-                        <button className="text-gray-600 hover:text-blue-600">
+                        <button 
+                          onClick={() => router.push(doc.shareUrl || `/forms/${doc.id}`)}
+                          className="text-gray-600 hover:text-blue-600"
+                          title="미리보기"
+                        >
                           <Eye className="h-4 w-4" />
                         </button>
-                        <button className="text-gray-600 hover:text-blue-600">
+                        <button 
+                          onClick={() => router.push(`/documents/edit/${doc.id}`)}
+                          className="text-gray-600 hover:text-blue-600"
+                          title="편집"
+                        >
                           <Edit2 className="h-4 w-4" />
                         </button>
-                        <button className="text-gray-600 hover:text-green-600">
+                        <button 
+                          onClick={() => handleCopyShareUrl(doc.shareUrl || `/forms/${doc.id}`)}
+                          className="text-gray-600 hover:text-green-600"
+                          title="공유 URL 복사"
+                        >
                           <Share2 className="h-4 w-4" />
                         </button>
-                        <button className="text-gray-600 hover:text-blue-600">
+                        <button 
+                          onClick={() => {
+                            const link = document.createElement('a')
+                            link.href = `data:text/plain;charset=utf-8,${encodeURIComponent(`문서: ${doc.title}\n상태: ${doc.status}\n생성일: ${doc.createdAt}`)}`
+                            link.download = `${doc.title}.txt`
+                            link.click()
+                          }}
+                          className="text-gray-600 hover:text-blue-600"
+                          title="다운로드"
+                        >
                           <Download className="h-4 w-4" />
                         </button>
-                        <button className="text-gray-600 hover:text-red-600">
+                        <button 
+                          onClick={() => handleDeleteDocument(doc.id)}
+                          className="text-gray-600 hover:text-red-600"
+                          title="삭제"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -285,7 +389,7 @@ export default function DashboardPage() {
           <div className="px-6 py-4 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-700">
-                총 <span className="font-medium">{mockDocuments.length}</span>개 문서
+                총 <span className="font-medium">{filteredDocuments.length}</span>개 문서
               </div>
               <div className="flex space-x-2">
                 <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50">

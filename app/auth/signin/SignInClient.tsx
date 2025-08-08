@@ -139,7 +139,7 @@ export default function SignInClient() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg mb-4">
             <FileText className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">문서서명 플랫폼</h1>
+          <h1 className="text-2xl font-bold text-gray-900">동의서 플랫폼</h1>
           <p className="text-gray-600 mt-2">계정에 로그인하세요</p>
         </div>
 

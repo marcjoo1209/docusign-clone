@@ -41,12 +41,12 @@ export default function HomePage() {
       <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-3">
+            <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
                 <FileText className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-gray-900">문서서명 플랫폼</h1>
-            </div>
+              <h1 className="text-xl font-bold text-gray-900">동의서 플랫폼</h1>
+            </Link>
             <nav className="hidden md:flex items-center space-x-8">
               <Link href="/features" className="text-gray-600 hover:text-blue-600 transition-colors">
                 주요 기능
@@ -306,7 +306,7 @@ export default function HomePage() {
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <FileText className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-lg font-semibold text-white">문서서명 플랫폼</span>
+                <span className="text-lg font-semibold text-white">동의서 플랫폼</span>
               </div>
               <p className="text-sm">
                 비즈니스 문서 작업을 더 스마트하게 만드는 전자서명 솔루션
@@ -346,7 +346,7 @@ export default function HomePage() {
           
           <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm">
-              © 2024 문서서명 플랫폼. All rights reserved.
+              © 2024 동의서 플랫폼. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link href="/terms" className="text-sm hover:text-white transition-colors">이용약관</Link>
