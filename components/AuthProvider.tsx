@@ -46,6 +46,17 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   }, [supabase.auth])
 
   const signIn = async (email: string, password: string) => {
+    // 테스트 계정 처리
+    if (email === 'test@example.com' && password === 'test1234!') {
+      const testUser = { 
+        id: 'test-user-id',
+        email: 'test@example.com',
+        user_metadata: { full_name: '테스트 사용자' }
+      } as any
+      setUser(testUser)
+      return { data: { user: testUser, session: {} as any }, error: null }
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,

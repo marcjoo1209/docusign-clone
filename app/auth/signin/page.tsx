@@ -23,6 +23,13 @@ export default function SignInPage() {
     setLoading(true)
     setError('')
 
+    // 테스트 계정 처리
+    if (email === 'test@example.com' && password === 'test1234!') {
+      setLoading(false)
+      router.push('/dashboard')
+      return
+    }
+
     const { error } = await signIn(email, password)
     
     if (error) {
@@ -33,9 +40,36 @@ export default function SignInPage() {
     }
   }
 
+  // 테스트 계정 자동 입력
+  const fillTestAccount = () => {
+    setEmail('test@example.com')
+    setPassword('test1234!')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* 테스트 계정 안내 */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-blue-900">테스트 계정</p>
+              <p className="text-sm text-blue-700 mt-1">
+                이메일: test@example.com<br />
+                비밀번호: test1234!
+              </p>
+              <button
+                type="button"
+                onClick={fillTestAccount}
+                className="mt-2 text-sm text-blue-600 hover:text-blue-700 underline"
+              >
+                테스트 계정으로 자동 입력
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* 로고 */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg mb-4">
